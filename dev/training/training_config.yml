@@ -1,0 +1,41 @@
+# training options
+NUM_EPOCHS: 10
+BATCH_SIZE: 128
+LIMIT_TRAIN_BATCHES: 1.0
+RESOLUTION: 300
+
+# logging and GPU options
+WANDB_PROJECT_NAME: 'test-1'
+DEVICES: [0]
+
+# model options
+HEAD_DWSCONV: True
+#FC_DIM: NUM_PLANTS * 1 need to set this elsewhere
+FC_DROPOUT: 0
+PRETRAINED_STEM: 'tf_efficientnetv2_m_in21k'
+LOADED_MODEL: None # None or 'path_to_litmodel.pkl'
+
+# optimizer options
+OPTIMIZER: "AdamW"
+LR: 5e-4
+WEIGHT_DECAY: 0.01 # default 0.01
+PRECISION: 16
+LOSS: "cross_entropy" # "cross_entropy" or "arcface"
+LAYERWISE_LR_DECAY: False
+LLRD_COEFF: 0.8
+
+# scheduler options
+REDUCE_LR_ON_PLATEAU: True
+ROP_COEFF: 0.75
+ROP_THRESHOLD: 0.01
+ROP_THRESHOLD_MODE: 'abs'
+EARLY_STOPPING: True
+STOCHASTIC_WEIGHT_AVERAGING: False
+ONE_CYCLE_TOTAL_STEPS: 100 # not used except for 1cycle LR scheduler
+
+# tuner options
+AUTO_LR_FIND: True # T or F
+AUTO_SCALE_BATCH_SIZE: None # 'power', 'binsearch' or None
+
+# data options
+TRAIN_SET: 'full'
