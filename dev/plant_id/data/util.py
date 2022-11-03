@@ -6,7 +6,9 @@ import torch
 
 
 SequenceOrTensor = Union[Sequence, torch.Tensor]
-## TODO: not clear if we still need this
+## TODO: not clear if we still need this. could put some of the methods
+## into inatdataset, or subclass basedataset when defining inatdataset
+## DONE: just subclass basedataset when defining inatdataset, doesn't hurt
 class BaseDataset(torch.utils.data.Dataset):
     """Base Dataset class that simply processes data and targets through optional transforms.
 

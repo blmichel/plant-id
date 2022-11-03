@@ -22,7 +22,9 @@ OFFSET = metadata.OFFSET
 ### dataset class for iNat
 # TODO: maybe this should inherit from BaseDataset. need refactor for compatibility?
 # or should we just use what we've got already and add any features that we want?
-class iNatDataset(Dataset):
+# DONE?: inheriting from BaseDataset just gives us a few methods (split_dataset,
+# resize_image) that could be useful
+class iNatDataset(BaseDataset):
     def __init__(
         self,
         root: str,
@@ -34,11 +36,14 @@ class iNatDataset(Dataset):
 
         assert os.path.isdir(self.root), "Provided directory of images does not exist"
 
+        # get an array of all the paths to plant folders
         paths = sorted(glob.glob(root + '/*Plantae*/*'))
         
-        # can combine this
+        # the class IDs are the first part of the pathname
+        # minus the offset (i.e. the folder number of the first plant) 
         class_ids = [int(base_path_name(paths[i]).split('_')[0]) - OFFSET \
             for i in range(len(paths))]
+        # each class gets associated with a path and an id
         self.index = {
             i : [paths[i], class_ids[i]] for i in range(len(paths))
             }
@@ -49,6 +54,7 @@ class iNatDataset(Dataset):
         
         #self.id_to_species = {int(base_path_name(path).split('_')[0] ) - OFFSET : ' '.join(base_path_name(path).split('_')[-2:]) for path in paths}
         # TODO: load this as a torch classmapping dict
+        # DONE?
                 
         for idx in range(PLANT_IDX_RANGE[0], PLANT_IDX_RANGE[1] + 1):
             assert idx-OFFSET in self.index, "Index %d not present in root" %idx
@@ -62,6 +68,8 @@ class iNatDataset(Dataset):
 
         Returns: tuple: (image, target)
         """
+        # TODO: what's the advantage of doing this here instead
+        # of in the stem?
         fname, target = self.index[idx]
         img = Image.open(fname)
 
@@ -70,73 +78,6 @@ class iNatDataset(Dataset):
 
         return img, target
 
-
-class INAT_MINI(BaseDataModule):
-    """iNat-mini DataModule."""
-
-    def __init__(self, split: str, args: argparse.Namespace) -> None:
-        super().__init__(args)
-        self.transform = iNatStem()
-        self.input_dims = metadata.DIMS
-        self.output_dims = metadata.OUTPUT_DIMS
-        self.augment = self.args.get("augment_data", "true").lower() == "true"
-        self.root = self.args.get("root", "/")
-        
-        self.setup('train')
-        self.setup('val')
-#        self.data_test = self.setup('test')
-
-    def setup(self, split: str):
-        if split == 'train':
-            data_dir = metadata.MINI_DATA_DIRNAME
-        elif split == 'val':
-            data_dir = metadata.VAL_DATA_DIRNAME
-        elif split == 'test':
-            data_dir = metadata.TEST_DATA_DIRNAME
-        else:
-            ValueError("Split must be 'train', 'val' or 'test'")
-
-        assert os.path.isdir(data_dir), f"Provided directory of images {data_dir} does not exist"
-
-        paths = sorted(glob.glob(data_dir + '/*Plantae*/*'))
-        self.hierarchy_map = {self.base_path_name(path).split('_')[-1]:int(self.base_path_name(path).split('_')[0]) - metadata.OFFSET for path in paths}
-    
-        indices = {
-            i:[paths[i], self.hierarchy_map[self.base_path_name(paths[i]).split('_')[-1]]] for i in range(len(paths))
-            }
-        for idx in range(metadata.PLANT_IDX_RANGE[0], metadata.PLANT_IDX_RANGE[1] + 1):
-            assert idx - metadata.OFFSET in self.index, "Index %d not present in root" %idx
-        
-        if split == 'train':
-            self.data_train = indices
-        elif split == 'val':
-            self.data_val = indices
-        elif split == 'test':
-            pass
-        else:
-            ValueError("Split must be 'train', 'val' or 'test'")    
-            
-    def __len__(self) -> None:
-        return len(self.train_index) + len(self.val_index)
-
-
-    def __getitem__(self, idx: int):
-        """
-        Inputs: - idx (int): Index; loader handles offset
-                - split: get item from train/val/test
-
-        Returns: tuple: (image, target)
-        """
-
-        fname, target = self.index[idx]
-        img = self.transform(Image.open(fname))
-
-        return img, target
-       
-    @staticmethod
-    def base_path_name(x):
-        return os.path.basename(os.path.dirname(x))
-    
     @staticmethod
     def add_to_argparse(parser):
         BaseDataModule.add_to_argparse(parser)
@@ -144,4 +85,4 @@ class INAT_MINI(BaseDataModule):
         return parser
 
 if __name__ == "__main__":
-    load_and_print_info(INAT_MINI)
+    load_and_print_info(iNatDataset)
