@@ -7,13 +7,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.utilities.rank_zero import rank_zero_info, rank_zero_only
 import torch
 
-import os
-import pdb
-
-pdb.set_trace()
-
-from . import callbacks as cb
-from . import lit_models
+from plant_id import callbacks as cb
+from plant_id import lit_models
 
 from training.util import DATA_CLASS_MODULE, import_class, MODEL_CLASS_MODULE, setup_data_and_model_from_args
 
