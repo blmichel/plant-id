@@ -2,6 +2,7 @@
 import argparse
 import yaml
 import os
+import multiprocessing
 
 import torch
 from torch.utils.data import DataLoader
@@ -19,6 +20,10 @@ if torch.cuda.is_available():
 elif torch.backends.mps.is_available():
     # hardcoded for now
     NUM_AVAIL_CPUS = 8
+    NUM_AVAIL_GPUS = 1
+# if no GPU
+else:
+    NUM_AVAIL_CPUS = multiprocessing.cpu_count()
     NUM_AVAIL_GPUS = 1
 DEFAULT_NUM_WORKERS = NUM_AVAIL_CPUS
 # in distributed data parallel mode, we launch a training on each GPU, so must divide out to keep total at one worker per CPU
