@@ -17,7 +17,7 @@ import torchvision.transforms as T
 from torchvision.transforms import ToTensor, Resize
 
 import yaml
-config_file = "../training/training_config.yml"
+config_file = "training_config.yml"
 with open(config_file, "rb") as file:
         config = yaml.load(file, Loader=yaml.Loader)
 
