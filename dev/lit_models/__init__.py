@@ -1,0 +1,1 @@
+from .lit_finetuning_cnn import LitFinetuningCNN

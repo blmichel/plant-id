@@ -1,14 +1,12 @@
 """Base Dataset class."""
+import argparse
 from typing import Any, Callable, Dict, Sequence, Tuple, Union
 
 from PIL import Image
 import torch
 
-
 SequenceOrTensor = Union[Sequence, torch.Tensor]
-## TODO: not clear if we still need this. could put some of the methods
-## into inatdataset, or subclass basedataset when defining inatdataset
-## DONE: just subclass basedataset when defining inatdataset, doesn't hurt
+
 class BaseDataset(torch.utils.data.Dataset):
     """Base Dataset class that simply processes data and targets through optional transforms.
 
@@ -85,3 +83,14 @@ def resize_image(image: Image.Image, scale_factor: int) -> Image.Image:
     if scale_factor == 1:
         return image
     return image.resize((image.width // scale_factor, image.height // scale_factor), resample=Image.BILINEAR)
+
+
+def load_and_print_info(data_module_class) -> None:
+    """Load data module class and print info."""
+    parser = argparse.ArgumentParser()
+    data_module_class.add_to_argparse(parser)
+    args = parser.parse_args()
+    dataset = data_module_class(args)
+    dataset.prepare_data()
+    dataset.setup()
+    print(dataset)

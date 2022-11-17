@@ -1,4 +1,4 @@
-## TODO: do we need any of this for plant id? just want image/label logging in wandb
+## TODO: modify this for plant id - want val image/top3 preds logging in wandb
 
 import pytorch_lightning as pl
 from pytorch_lightning.utilities import rank_zero_only

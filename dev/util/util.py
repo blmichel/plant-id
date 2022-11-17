@@ -13,13 +13,13 @@ from PIL import Image
 import smart_open
 from tqdm import tqdm
 
-import torchvision.Transforms as T
+import torchvision.transforms as T
 from torchvision.transforms import ToTensor, Resize
 
 import yaml
 config_file = "../training/training_config.yml"
 with open(config_file, "rb") as file:
-        config = yaml.load(file)
+        config = yaml.load(file, Loader=yaml.Loader)
 
 ### our helper functions
 def base_path_name(x):

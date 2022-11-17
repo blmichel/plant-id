@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# lit and wandb logs
+logs/
+wandb/
+
+# model checkpoints
+.pkl
+
+# DS_STORE
+.DS_STORE

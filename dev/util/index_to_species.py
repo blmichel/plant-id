@@ -1,3 +1,5 @@
+## this file is outdated and needs to be refactored using the latest dataset code
+
 import glob
 import pdb
 import os

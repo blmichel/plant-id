@@ -1,5 +1,5 @@
-# FSDL-PlantID
-This repo contains the Python code files for the plant identification project which is a part of FSDL project. 
+# PlantID
+This repo contains the Python code files for Plant ID. 
 
 
 # Goals

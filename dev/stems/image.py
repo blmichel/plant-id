@@ -1,6 +1,16 @@
+"""Stem classes for preprocessing images."""
+## these classes are not currently used, see comments in data/inat_ds.py under __getitem__ 
+
 import torch
 from torchvision import transforms
-from PIL import Image
+import yaml
+
+## load config
+config_file = "training_config.yml"
+with open(config_file, "rb") as file:
+        config = yaml.load(file, Loader=yaml.Loader)
+
+resolution = config['RESOLUTION']
 
 class ImageStem:
     """A stem for models operating on images.
@@ -26,7 +36,6 @@ class ImageStem:
         self.torch_transforms = torch.nn.Sequential()
 
     def __call__(self, img):
-#        img = Image.open(img) currently transforming to PIL in data/inat.py
         img = self.pil_transforms(img)
         img = self.pil_to_tensor(img)
 
@@ -34,15 +43,15 @@ class ImageStem:
             img = self.torch_transforms(img)
 
         return img
-
+    
+    
 class iNatStem(ImageStem):
     """A stem for handling images from the iNat datasets."""
 
     # TODO: what's the appropriate normalization for imagenet-pretrained models?
-    # TODO: load resolution instead of resizing to 224x224
     def __init__(self):
         super().__init__()
         self.torch_transforms = torch.nn.Sequential([transforms.Normalize((0.1307,), (0.3081,)),
-                                                     transforms.Resize((224,224)),
+                                                     transforms.Resize((resolution, resolution)),
                                                      transforms.ToTensor()])
                                                     

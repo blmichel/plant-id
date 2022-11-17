@@ -9,4 +9,6 @@ Most datasets define their constants in a submodule
 of the metadata module that is parallel to this one in the
 hierarchy.
 """
-from . import shared, inat
+from .util import BaseDataset
+from .inat_dm import iNatDataModule
+from .inat_ds import iNatDataset
