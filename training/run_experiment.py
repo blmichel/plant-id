@@ -39,23 +39,6 @@ if config['TRAIN_SET'] == 'full':
     WANDB_RUN_NAME += ' ds=full'
 # could do control flow here to add options only when they're non-default
 
-## from FSDL: sensible multiprocessing defaults, at most one worker per CPU
-if torch.cuda.is_available():
-    NUM_AVAIL_CPUS = len(os.sched_getaffinity(0))
-    NUM_AVAIL_GPUS = torch.cuda.device_count()
-# on mps, can't use sched_getaffinity
-elif torch.backends.mps.is_available():
-    # hardcoded for now
-    NUM_AVAIL_CPUS = 8
-    NUM_AVAIL_GPUS = 1
-# if no GPU
-else:
-    NUM_AVAIL_CPUS = multiprocessing.cpu_count()
-    NUM_AVAIL_GPUS = 1
-DEFAULT_NUM_WORKERS = NUM_AVAIL_CPUS
-# in distributed data parallel mode, we launch a training on each GPU, so must divide out to keep total at one worker per CPU
-DEFAULT_NUM_WORKERS = NUM_AVAIL_CPUS // NUM_AVAIL_GPUS if NUM_AVAIL_GPUS else DEFAULT_NUM_WORKERS
-
 ### main
 def main(training_config):
     
@@ -97,7 +80,7 @@ def main(training_config):
     callbacks = [checkpoint_callback, lr_callback, ]
     if config['EARLY_STOPPING']:
         callbacks.append(pl.callbacks.EarlyStopping(
-        monitor="validation/acc",
+        monitor=goldstar_metric,
         mode="max",
         patience=1,
         ))
@@ -142,18 +125,21 @@ def main(training_config):
                          accelerator=config['ACCELERATOR'],
                          callbacks=callbacks,
                          logger=logger,
-                         auto_scale_batch_size=training_config['auto_scale_batch_size'],
+                         auto_scale_batch_size=auto_scale_batch_size,
                          auto_lr_find=config['AUTO_LR_FIND'],
                          precision=training_config['precision'],
                          limit_train_batches=config['LIMIT_TRAIN_BATCHES'],
                          )
     trainer.tune(lit_model, datamodule=datamodule)
-    trainer.fit(lit_model, datamodule=datamodule)
-    
-    ## save the model + state dict to disk and add as artifact to wandb
-    # TODO: only save if val/acc above some threshold
+    # need to update wandb config if tuning bs or lr
     if config['USE_WANDB']:
         wandb.config.update({'batch_size': datamodule.batch_size})
+        wandb.config.update({'lr': lit_model.lr})
+    trainer.fit(lit_model, datamodule=datamodule)
+    
+    ## save the model to disk and add as artifact to wandb
+    # TODO: only save if val/acc above some threshold 
+    if config['USE_WANDB']:
         run_id = wandb.run.id
         wandb.unwatch(lit_model) # need to remove wandb hooks in order to torch.save model
     else:
@@ -166,7 +152,8 @@ def main(training_config):
         model_artifact = wandb.Artifact(model_pkl_name, "model")    
         model_artifact.add_file(f"model_{run_id}.pkl")
         
-        config_artifact = wandb.Artifact(config_file, "config_yaml")  
+        config_artifact = wandb.Artifact(config_file, "config_yaml")
+        config_artifact.add_file(config_file)  
           
         wandb.log_artifact(model_artifact)
         wandb.log_artifact(config_artifact)
@@ -174,14 +161,15 @@ def main(training_config):
 
 ### usage: python3 run_experiment.py
 if __name__ == '__main__':
-    import sys
 
-    ## process args
-    if config['AUTO_LR_FIND']=='True':
+    ## process config options
+    if config['AUTO_LR_FIND']==True:
         lr = 'autotune'
+        auto_lr_find = 'False'
     else:
         lr = config['LR']
-     
+        auto_lr_find = 'True'
+
     if config['AUTO_SCALE_BATCH_SIZE']=='None':
         auto_scale_batch_size = None
     else:
@@ -191,6 +179,11 @@ if __name__ == '__main__':
         loaded_model = 'None'
     else:
         loaded_model = config['LOADED_MODEL']
+    
+    # TODO: use config yaml directly in wandb.init
+    # to avoid ugliness like passing auto_lr_find
+    # but config['AUTO_SCALE_BATCH_SIZE'] (since
+    # the yaml loader can process bools but not nonetype)
         
     ## training metadata    
     training_config = dict(
@@ -198,10 +191,10 @@ if __name__ == '__main__':
         infra = "BLM MBA",
         pretrained_stem = config['PRETRAINED_STEM'],
         resolution = config['RESOLUTION'],
-        passed_base_learning_rate = lr,
-        auto_lr_find = config['AUTO_LR_FIND'],
+        lr = lr,
+        auto_lr_find = auto_lr_find,
         batch_size = config['BATCH_SIZE'],
-        auto_scale_batch_size = auto_scale_batch_size,
+        auto_scale_batch_size = config['AUTO_SCALE_BATCH_SIZE'],
         weight_decay = config['WEIGHT_DECAY'],
         fc_dropout = config['FC_DROPOUT'],
         fc_dim = config['FC_DIM'],

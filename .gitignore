@@ -134,6 +134,7 @@ wandb/
 
 # model checkpoints
 .pkl
+.ckpt
 
 # DS_STORE
 .DS_STORE

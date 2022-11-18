@@ -1,22 +1,22 @@
 # local setup: path to data and mapping file
-BASE_DATA_DIRNAME: '/Users/blmichel/Documents/docs/ml/data/inat2021/'
-MAPPING_FILE_DIRNAME: '/Users/blmichel/Documents/docs/ml/repos/plant-id-refactor/dev/plant_id/metadata/'
+BASE_DATA_DIRNAME: '/content/' #'/Users/blmichel/Documents/docs/ml/data/inat2021/'
+MAPPING_FILE_DIRNAME: '/content/plant-id/dev/metadata/' #'/Users/blmichel/Documents/docs/ml/repos/plant-id/dev/metadata/'
 
 # training options
-NUM_EPOCHS: 3
-BATCH_SIZE: 48
+NUM_EPOCHS: 8
+BATCH_SIZE: 128
 LIMIT_TRAIN_BATCHES: 1.0
-RESOLUTION: 260
+RESOLUTION: 360
 TRAIN_SET: 'mini'
 
 # logging and GPU options
-USE_WANDB: False
+USE_WANDB: True
 WANDB_PROJECT_NAME: 'test-1'
 DEVICES: -1
 ACCELERATOR: 'gpu'
 
 # model options
-PRETRAINED_STEM: 'tf_efficientnetv2_s_in21k'
+PRETRAINED_STEM: 'tf_efficientnetv2_m_in21k' # must be a pretrained model from timm
 LOADED_MODEL: None # None or 'path_to_litmodel.pkl'
 HEAD_DWSCONV: True
 FC_DIM: 4271 # default: 4271 (number of plant classes in iNat2021)
@@ -24,8 +24,8 @@ FC_DROPOUT: 0
 
 # optimizer options
 OPTIMIZER: "AdamW"
-LR: 5e-4 # default 1e-3
-WEIGHT_DECAY: 0.01 # default 0.01
+LR: 5e-4 # default 1e-3, 5e-4 seems to work well 
+WEIGHT_DECAY: 0.1 # default 0.01
 PRECISION: 16 # 16 for AMP, 32 for standard training (on MPS this is disabled)
 LOSS: "cross_entropy" # "cross_entropy" or "arcface"
 LAYERWISE_LR_DECAY: False
@@ -33,9 +33,9 @@ LLRD_COEFF: 0.8
 
 # scheduler options
 EARLY_STOPPING: True
-REDUCE_LR_ON_PLATEAU: False
+REDUCE_LR_ON_PLATEAU: True
 ROP_COEFF: 0.75
-ROP_THRESHOLD: 0.01
+ROP_THRESHOLD: 0.015 # we often use 0.01 'abs'
 ROP_THRESHOLD_MODE: 'abs'
 ONE_CYCLE_LR: False
 ONE_CYCLE_MAX_LR: 5e-4

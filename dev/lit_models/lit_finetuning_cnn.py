@@ -10,7 +10,7 @@ from pytorch_metric_learning import losses
 import dev.metadata.inat as metadata
 
 ## load config
-config_file = "training_config.yml"
+config_file = 'training_config.yml'
 with open(config_file, "rb") as file:
         config = yaml.load(file, Loader=yaml.Loader)
 
@@ -55,7 +55,7 @@ class LitFinetuningCNN(pl.LightningModule):
         
         # optimizer config for reduce lr on plateau
         if config['REDUCE_LR_ON_PLATEAU']:
-            assert self.one_cycle_max_lr is None, "Error: 1cycle scheduler incompatible with ReduceLROnPlateau"
+            assert not config['ONE_CYCLE_LR'], "Error: 1cycle scheduler incompatible with ReduceLROnPlateau"
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max',
                                                             factor=config['ROP_COEFF'],
                                                             patience=0, verbose=True,
