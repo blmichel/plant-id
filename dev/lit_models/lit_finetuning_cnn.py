@@ -42,9 +42,9 @@ class LitFinetuningCNN(pl.LightningModule):
             self.loss_fn = getattr(torch.nn.functional, self.loss)
             
         # use accuracy as the gold star metric
-        self.train_acc = Accuracy(task='multiclass')
-        self.val_acc = Accuracy(task='multiclass')
-        self.test_acc = Accuracy(task='multiclass')
+        self.train_acc = Accuracy(task='multiclass', num_classes=metadata.NUM_PLANT_CLASSES)
+        self.val_acc   = Accuracy(task='multiclass', num_classes=metadata.NUM_PLANT_CLASSES)
+        self.test_acc  = Accuracy(task='multiclass', num_classes=metadata.NUM_PLANT_CLASSES)
 
     def configure_optimizers(self):
         optimizer = self.optimizer_class(self.parameters(), lr=self.lr, weight_decay=self.wd)
