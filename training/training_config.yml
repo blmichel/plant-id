@@ -3,10 +3,10 @@ BASE_DATA_DIRNAME: '/content/' #'/Users/blmichel/Documents/docs/ml/data/inat2021
 MAPPING_FILE_DIRNAME: '/content/plant-id/dev/metadata/' #'/Users/blmichel/Documents/docs/ml/repos/plant-id/dev/metadata/'
 
 # training options
-NUM_EPOCHS: 8
-BATCH_SIZE: 128
+NUM_EPOCHS: 10
+BATCH_SIZE: 140
 LIMIT_TRAIN_BATCHES: 1.0
-RESOLUTION: 360
+RESOLUTION: 300
 TRAIN_SET: 'mini'
 
 # logging and GPU options
@@ -22,10 +22,12 @@ HEAD_DWSCONV: True
 FC_DIM: 4271 # default: 4271 (number of plant classes in iNat2021)
 FC_DROPOUT: 0
 
+# TODO: add augmentation options here
+
 # optimizer options
 OPTIMIZER: "AdamW"
 LR: 5e-4 # default 1e-3, 5e-4 seems to work well 
-WEIGHT_DECAY: 0.1 # default 0.01
+WEIGHT_DECAY: 0.01 # default 0.01
 PRECISION: 16 # 16 for AMP, 32 for standard training (on MPS this is disabled)
 LOSS: "cross_entropy" # "cross_entropy" or "arcface"
 LAYERWISE_LR_DECAY: False
@@ -34,7 +36,7 @@ LLRD_COEFF: 0.8
 # scheduler options
 EARLY_STOPPING: True
 REDUCE_LR_ON_PLATEAU: True
-ROP_COEFF: 0.75
+ROP_COEFF: 0.8
 ROP_THRESHOLD: 0.015 # we often use 0.01 'abs'
 ROP_THRESHOLD_MODE: 'abs'
 ONE_CYCLE_LR: False
@@ -43,5 +45,5 @@ ONE_CYCLE_TOTAL_STEPS: 100 # not used except for 1cycle LR scheduler
 STOCHASTIC_WEIGHT_AVERAGING: False
 
 # tuner options
-AUTO_LR_FIND: False # True or False
+AUTO_LR_FIND: True # True or False
 AUTO_SCALE_BATCH_SIZE: None # 'power', 'binsearch' or None

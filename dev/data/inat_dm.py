@@ -34,7 +34,7 @@ config_file = "training_config.yml"
 with open(config_file, "rb") as file:
         config = yaml.load(file, Loader=yaml.Loader)
 
-## get appropriate directories from metadata 
+## get appropriate directories from metadata
 if config['TRAIN_SET'] == 'mini':
     TRAIN_DIR = metadata.MINI_DATA_DIRNAME
 elif config['TRAIN_SET'] == 'full':

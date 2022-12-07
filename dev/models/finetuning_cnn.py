@@ -129,6 +129,7 @@ class FinetuningCNN(nn.Module):
                 
         elif self.mode == 'resnext':
             self.stem = nn.Sequential(*[i for i in m.children()][:-2])
+            # what size resnext has this # of output channels?
             stem_out_feats = 2048
             self.bn = BatchNormAct2d(
                 fc_dim, 
@@ -165,6 +166,7 @@ class FinetuningCNN(nn.Module):
             self.classifier = torch.nn.Linear(fc_dim, num_classes)
             ln_feats = fc_dim
         else:
+            self.dwsconv = torch.nn.Identity()
             self.classifier = torch.nn.Linear(stem_out_feats, num_classes)
             ln_feats = stem_out_feats
             

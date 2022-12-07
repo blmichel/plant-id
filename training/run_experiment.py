@@ -3,7 +3,6 @@ from pathlib import Path
 import yaml
 import sys
 import os
-import multiprocessing
 
 import numpy as np
 import pytorch_lightning as pl
@@ -58,6 +57,8 @@ def main(training_config):
         mode = 'resnext'
     
     ## set log dir and format filename
+    # TODO: create if not there already
+    #if not os.path.isdir("../data/transport")
     log_dir = Path.cwd() / "logs"
     logger = pl.loggers.TensorBoardLogger(log_dir)
     experiment_dir = logger.log_dir
@@ -90,12 +91,13 @@ def main(training_config):
                                                                 annealing_epochs=5,
         ))
     
-    ## set up lit model and datamodule
+    ## configure module options
     input_channels = 3
     DATA_CONFIG = {"input_dims" : (input_channels, training_config['resolution'], training_config['resolution'])}
     MODEL_CONFIG = {"pretrained_stem" : pretrained_stem, "fc_dim": training_config['fc_dim'],
                     "fc_dropout" : training_config['fc_dropout'], "mode": mode}    
 
+    ## set up lit model and datamodule
     model = models.FinetuningCNN(data_config=DATA_CONFIG, model_config=MODEL_CONFIG)
     lit_model = lit_models.LitFinetuningCNN(model)
     datamodule = data.iNatDataModule()
@@ -181,9 +183,9 @@ if __name__ == '__main__':
         loaded_model = config['LOADED_MODEL']
     
     # TODO: use config yaml directly in wandb.init
-    # to avoid ugliness like passing auto_lr_find
-    # but config['AUTO_SCALE_BATCH_SIZE'] (since
-    # the yaml loader can process bools but not nonetype)
+    # to avoid ugliness like passing preprocessed auto_lr_find
+    # but raw config['AUTO_SCALE_BATCH_SIZE']
+    # (since the yaml loader can process bools but not nonetype)
         
     ## training metadata    
     training_config = dict(
